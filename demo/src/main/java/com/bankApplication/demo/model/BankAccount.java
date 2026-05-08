@@ -1,6 +1,9 @@
 package com.bankApplication.demo.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
 import java.util.ArrayList;
