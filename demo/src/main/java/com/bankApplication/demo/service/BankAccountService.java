@@ -1,5 +1,7 @@
 package com.bankApplication.demo.service;
 
+import com.bankApplication.demo.advice.AccountNotFoundException;
+import com.bankApplication.demo.advice.InsufficientFundsException;
 import com.bankApplication.demo.model.BankAccount;
 import com.bankApplication.demo.model.Transaction;
 import com.bankApplication.demo.repository.BankAccountRepository;
@@ -34,7 +36,7 @@ public class BankAccountService {
     public BankAccount createBankAccount(double balance){
 
         if(balance<0){
-            throw new IllegalArgumentException("Balance can't be negative");
+            throw new IllegalArgumentException("Balance can't be negative(service layer)");
         }
 
         //check if an account with the same number already
@@ -97,7 +99,7 @@ public class BankAccountService {
 
     public Double getBalanceById(int id) {
         BankAccount account = bankAccountRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("Account not found"));
+                .orElseThrow(()-> new AccountNotFoundException(id));
         return account.getBalance();
     }
 
@@ -113,7 +115,7 @@ public class BankAccountService {
                 .orElseThrow(()-> {
 
                         log.warn("No account found");
-                        return new RuntimeException("Account not found");
+                        return new AccountNotFoundException(id);
                 });
 
         // record the transaction first :
@@ -154,7 +156,7 @@ public class BankAccountService {
         BankAccount account = bankAccountRepository.findById(id)
                 .orElseThrow(()-> {
                     log.warn("No account found ");
-                    return new RuntimeException("Account not found");
+                    return new AccountNotFoundException(id);
                 });
 
 
@@ -170,7 +172,7 @@ public class BankAccountService {
         if(amount>account.getBalance()){
             transactionService.markFailed(transaction.getTransactionId());
             log.warn("Failed to withdraw {}", transaction.getAmount());
-            throw new IllegalArgumentException("Insufficient funds");
+            throw new InsufficientFundsException();
         }
 
 

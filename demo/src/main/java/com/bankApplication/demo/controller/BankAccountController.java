@@ -3,6 +3,7 @@ package com.bankApplication.demo.controller;
 import com.bankApplication.demo.dto.*;
 import com.bankApplication.demo.model.BankAccount;
 import com.bankApplication.demo.service.BankAccountService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,11 +26,15 @@ public class BankAccountController {
     // **********************create**************************
 
     @PostMapping("/create")
-    public ResponseEntity<BankAccount> createBankAccount(@RequestBody double amount){
-        BankAccount account = bankAccountService.createBankAccount(amount);
+    public ResponseEntity<BankAccount> createBankAccount
+            (@Valid @RequestBody CreateAccountRequest request){
+        BankAccount account = bankAccountService.createBankAccount(request.getBalance());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(account);
     }
+
+
+
 
 
 
