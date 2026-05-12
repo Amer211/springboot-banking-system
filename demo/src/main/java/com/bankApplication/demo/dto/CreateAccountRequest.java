@@ -12,4 +12,6 @@ public class CreateAccountRequest {
 
     @PositiveOrZero(message = "balance can't be negative")
     private double balance;
+
+    private Integer userId;
 }

@@ -28,7 +28,8 @@ public class BankAccountController {
     @PostMapping("/create")
     public ResponseEntity<BankAccount> createBankAccount
             (@Valid @RequestBody CreateAccountRequest request){
-        BankAccount account = bankAccountService.createBankAccount(request.getBalance());
+        BankAccount account = bankAccountService.createBankAccount
+                (request.getBalance(), request.getUserId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(account);
     }

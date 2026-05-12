@@ -1,9 +1,7 @@
 package com.bankApplication.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -31,6 +29,13 @@ public class BankAccount {
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL,orphanRemoval = true)
     @OrderBy("createdAt DESC")
     private List<Transaction> transactions = new ArrayList<>();
+
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private User user;
 
 
 

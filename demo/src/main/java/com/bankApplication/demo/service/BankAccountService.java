@@ -4,6 +4,7 @@ import com.bankApplication.demo.advice.AccountNotFoundException;
 import com.bankApplication.demo.advice.InsufficientFundsException;
 import com.bankApplication.demo.model.BankAccount;
 import com.bankApplication.demo.model.Transaction;
+import com.bankApplication.demo.model.User;
 import com.bankApplication.demo.repository.BankAccountRepository;
 
 import org.slf4j.Logger;
@@ -20,20 +21,26 @@ import java.util.concurrent.CompletableFuture;
 public class BankAccountService {
 
 
+    private final UserService userService;
 
     private static final Logger log = LoggerFactory.getLogger(BankAccountService.class);
     private final BankAccountRepository bankAccountRepository;
     private final TransactionService transactionService;
 
 
-    public BankAccountService(BankAccountRepository bankAccountRepository, TransactionService transactionService) {
+    public BankAccountService(UserService userService, BankAccountRepository bankAccountRepository, TransactionService transactionService) {
+        this.userService = userService;
         this.bankAccountRepository = bankAccountRepository;
 
         this.transactionService = transactionService;
     }
 
+
+    // ******************** create bank account ***********************
+
+
     @Transactional  // import from Spring not Jakarta
-    public BankAccount createBankAccount(double balance){
+    public BankAccount createBankAccount(double balance, int userId){
 
         if(balance<0){
             throw new IllegalArgumentException("Balance can't be negative(service layer)");
@@ -49,6 +56,8 @@ public class BankAccountService {
         } while (isAccountExists(accountNumber));
 
         account.setAccountNumber(accountNumber);
+        User user = userService.getUserById(userId);
+        account.setUser(user);
 
         log.info("creating bank account Number : {} with balance: {}",
                 account.getAccountNumber(),balance);
