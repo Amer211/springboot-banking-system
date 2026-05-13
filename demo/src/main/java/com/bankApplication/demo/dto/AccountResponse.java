@@ -4,20 +4,22 @@ import com.bankApplication.demo.model.AccountType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class CreateAccountRequest {
+public class AccountResponse {
 
-    @PositiveOrZero(message = "balance can't be negative")
+    private Integer accountId;
+    private String accountNumber;
     private double balance;
-
-    @NotNull(message = "userId is required")
-    private Integer userId;
-
-    @NotNull(message = "Account type can't be null")
     private AccountType accountType;
+
+
+
+
 }

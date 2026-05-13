@@ -4,34 +4,36 @@ import com.bankApplication.demo.dto.*;
 import com.bankApplication.demo.model.BankAccount;
 import com.bankApplication.demo.service.BankAccountService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.text.html.parser.Entity;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
+@RequiredArgsConstructor
+@RequestMapping("/accounts")
 public class BankAccountController {
 
     private final BankAccountService bankAccountService;
 
 
-    public BankAccountController(BankAccountService bankAccountService) {
-        this.bankAccountService = bankAccountService;
-    }
+
 
 
     // **********************create**************************
 
     @PostMapping("/create")
-    public ResponseEntity<BankAccount> createBankAccount
+    public ResponseEntity<AccountResponse> createBankAccount
             (@Valid @RequestBody CreateAccountRequest request){
-        BankAccount account = bankAccountService.createBankAccount
-                (request.getBalance(), request.getUserId());
+
+        AccountResponse response = bankAccountService.createBankAccount(request);
+
+
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(account);
+                .body(response);
     }
 
 

@@ -2,15 +2,20 @@ package com.bankApplication.demo.service;
 
 import com.bankApplication.demo.advice.AccountNotFoundException;
 import com.bankApplication.demo.advice.InsufficientFundsException;
+import com.bankApplication.demo.dto.AccountResponse;
+import com.bankApplication.demo.dto.CreateAccountRequest;
 import com.bankApplication.demo.model.BankAccount;
 import com.bankApplication.demo.model.Transaction;
 import com.bankApplication.demo.model.User;
 import com.bankApplication.demo.repository.BankAccountRepository;
 
+import com.bankApplication.demo.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -18,51 +23,62 @@ import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class BankAccountService {
 
 
-    private final UserService userService;
+    private final UserRepository userRepository;
 
-    private static final Logger log = LoggerFactory.getLogger(BankAccountService.class);
     private final BankAccountRepository bankAccountRepository;
     private final TransactionService transactionService;
 
 
-    public BankAccountService(UserService userService, BankAccountRepository bankAccountRepository, TransactionService transactionService) {
-        this.userService = userService;
-        this.bankAccountRepository = bankAccountRepository;
 
-        this.transactionService = transactionService;
-    }
+
 
 
     // ******************** create bank account ***********************
 
 
     @Transactional  // import from Spring not Jakarta
-    public BankAccount createBankAccount(double balance, int userId){
+    public AccountResponse createBankAccount(CreateAccountRequest request){
 
-        if(balance<0){
+        if(request.getBalance()<0){
             throw new IllegalArgumentException("Balance can't be negative(service layer)");
         }
 
         //check if an account with the same number already
         //exists in the database.
 
-        BankAccount account = new BankAccount(balance);
+        BankAccount account = new BankAccount(request.getBalance(), request.getAccountType());
+
+
+        BankAccount savedAccount =
+                bankAccountRepository.save(account);
+
         String accountNumber;
         do {
             accountNumber = generateAccount();
         } while (isAccountExists(accountNumber));
 
         account.setAccountNumber(accountNumber);
-        User user = userService.getUserById(userId);
-        account.setUser(user);
+        User savedUser = userRepository.findById(request.getUserId())
+                        .orElseThrow(()-> {
+                            log.warn("User with id {} not found", request.getUserId());
+                            return new IllegalArgumentException("User not found");
+                        });
+        account.setUser(savedUser);
 
         log.info("creating bank account Number : {} with balance: {}",
-                account.getAccountNumber(),balance);
+                account.getAccountNumber(),request.getBalance());
 
-        return bankAccountRepository.save(account);
+        return AccountResponse.builder()
+                .accountId(savedAccount.getId())
+                .accountNumber(savedAccount.getAccountNumber())
+                .balance(savedAccount.getBalance())
+                .accountType(savedAccount.getAccountType())
+                .build();
     }
 
 
@@ -209,4 +225,15 @@ public class BankAccountService {
 
     }
 
+    public List<AccountResponse> getAccountsByUserId(int userId) {
+        return bankAccountRepository.findByUser_UserId(userId)
+                .stream()
+                .map(account -> AccountResponse.builder()
+                        .accountId(account.getId())
+                        .accountNumber(account.getAccountNumber())
+                        .balance(account.getBalance())
+                        .accountType(account.getAccountType())
+                        .build())
+                .toList();
+    }
 }

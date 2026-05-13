@@ -1,5 +1,6 @@
 package com.bankApplication.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -37,6 +38,7 @@ public class Transaction {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
+    @JsonBackReference
     private BankAccount account;
 
 

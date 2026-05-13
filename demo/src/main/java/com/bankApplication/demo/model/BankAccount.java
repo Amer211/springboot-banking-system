@@ -1,6 +1,7 @@
 package com.bankApplication.demo.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.bankApplication.demo.advice.InsufficientFundsException;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -34,15 +35,28 @@ public class BankAccount {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    @JsonIgnore
+    @JsonBackReference
     private User user;
 
+    @Column
+    private boolean Active = true;
+
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private AccountType accountType;
 
 
 
-    public BankAccount(double balance) {
+
+
+
+    // *************** CONSTRUCTORS ***********************
+
+
+    public BankAccount(double balance, AccountType accountType) {
         this.balance = balance;
-
+        this.accountType = accountType;
     }
 
     public void deposit(double amount){
@@ -58,8 +72,11 @@ public class BankAccount {
 
 
     public void withdraw(double amount){
+        if (amount<=0){
+            throw new IllegalArgumentException("Withdrawal must be positive");
+        }
         if (amount>balance){
-            throw new RuntimeException("Insufficient funds");
+            throw new InsufficientFundsException();
         }else {
             balance-=amount;
 

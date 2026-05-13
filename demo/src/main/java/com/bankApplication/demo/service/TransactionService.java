@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class TransactionService {
 
@@ -55,11 +57,17 @@ public class TransactionService {
     }
 
 
+    public List<Transaction> getAllTransactions() {
+        return transactionRepository.findAll();
+    }
 
+    public Transaction getTransactionById(Long id) {
+        return transactionRepository.findById(id)
+                .orElseThrow(()-> new IllegalArgumentException("Transaction with id: " + id + " not found"));
+    }
 
-
-
-
-
-
+    public Transaction getTransactionByReferenceId(String referenceId) {
+        return transactionRepository.findByReferenceId(referenceId)
+                .orElseThrow(()-> new IllegalArgumentException("Transaction with reference id: " + referenceId + " not found"));
+    }
 }

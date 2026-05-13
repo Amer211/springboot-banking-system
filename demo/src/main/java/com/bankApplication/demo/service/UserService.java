@@ -1,44 +1,92 @@
 package com.bankApplication.demo.service;
 
-import com.bankApplication.demo.model.BankAccount;
+import com.bankApplication.demo.dto.AccountResponse;
+import com.bankApplication.demo.dto.CreateAccountRequest;
+import com.bankApplication.demo.dto.UserRequest;
+import com.bankApplication.demo.dto.UserResponse;
 import com.bankApplication.demo.model.User;
 import com.bankApplication.demo.repository.UserRepository;
-import jakarta.validation.constraints.Future;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
+
     private final UserRepository userRepository;
+    private final BankAccountService bankAccountService;
+
+    private final Logger log = LoggerFactory.getLogger(UserService.class);
 
 
-    public final Logger log = LoggerFactory.getLogger(UserService.class);
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+
+    // ********************** create user **************************
+
+    @Transactional
+    public UserResponse saveUser(UserRequest request){
+
+        User user = User.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .email(request.getEmail())
+                .password(request.getPassword())
+                .build();
+
+        User savedUser = userRepository.save(user);
+        log.info("user with id: {} saved successfully.", savedUser.getUserId());
+
+
+        AccountResponse account = bankAccountService.createBankAccount(
+                new CreateAccountRequest(0.0,
+                        savedUser.getUserId(),
+                        request.getAccountType())
+        );
+
+        return UserResponse.builder()
+                .userId(savedUser.getUserId())
+                .firstName(savedUser.getFirstName())
+                .lastName(savedUser.getLastName())
+                .email(savedUser.getEmail())
+                .accounts(List.of(account))
+                .build();
+
+
+
+
 
     }
 
-    public User saveUser(User user){
-        log.info("saving user with id: {}.", user.getUserId());
 
-        return userRepository.save(user);
-    }
-
-
-    public List<User> getAllUsers(){
+    public List<UserResponse> getAllUsers(){
         log.info("fetching all users.");
-        return userRepository.findAll();
+        return userRepository.findAll()
+                .stream()
+                .map(this::mapToUserResponse)
+                .toList();
     }
 
 
-    public User getUserById(int userId) {
+    public UserResponse getUserById(int userId) {
         log.info("fetching user with id: {}.", userId);
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+        User user= userRepository.findById(userId)
+               .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+               return mapToUserResponse(user);
+    }
+
+    private UserResponse mapToUserResponse(User user) {
+        return UserResponse.builder()
+                .userId(user.getUserId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .build();
     }
 }
