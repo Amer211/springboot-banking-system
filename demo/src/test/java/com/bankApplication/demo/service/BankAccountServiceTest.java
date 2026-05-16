@@ -1,5 +1,6 @@
 package com.bankApplication.demo.service;
 
+import com.bankApplication.demo.model.AccountType;
 import com.bankApplication.demo.model.BankAccount;
 import com.bankApplication.demo.repository.BankAccountRepository;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,7 @@ class BankAccountServiceTest {
 
     @Test
     void shouldCreateBankAccount() {
-        BankAccount account= new BankAccount(1000);
+        BankAccount account= new BankAccount(1000, AccountType.COMPLETE_CHECKING);
         account.setId(1);
         account.setAccountNumber("1234");
 
