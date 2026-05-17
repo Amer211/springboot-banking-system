@@ -4,8 +4,10 @@ import com.bankApplication.demo.advice.AccountNotFoundException;
 import com.bankApplication.demo.advice.InsufficientFundsException;
 import com.bankApplication.demo.dto.AccountResponse;
 import com.bankApplication.demo.dto.CreateAccountRequest;
+import com.bankApplication.demo.dto.TransferResponse;
 import com.bankApplication.demo.model.BankAccount;
 import com.bankApplication.demo.model.Transaction;
+import com.bankApplication.demo.model.TransactionType;
 import com.bankApplication.demo.model.User;
 import com.bankApplication.demo.repository.BankAccountRepository;
 
@@ -114,9 +116,18 @@ public class BankAccountService {
 
 
 
-    public List<BankAccount> getAllAccount(){
+    public List<AccountResponse> getAllAccounts(){
         log.info("Retrieving all accounts..");
-        return bankAccountRepository.findAll();
+        return bankAccountRepository.findAll()
+                .stream()
+                .map(account -> AccountResponse.builder()
+                        .accountId(account.getId())
+                        .accountNumber(account.getAccountNumber())
+                        .balance(account.getBalance())
+                        .accountType(account.getAccountType())
+                        .transactions(account.getTransactions())
+                        .build())
+                .toList();
     }
 
 
@@ -130,6 +141,17 @@ public class BankAccountService {
         return account.getBalance();
     }
 
+    public AccountResponse getAccountById(int id) {
+        BankAccount account = bankAccountRepository.findById(id)
+                .orElseThrow(()-> new AccountNotFoundException(id));
+        return AccountResponse.builder()
+                .accountId(account.getId())
+                .accountNumber(account.getAccountNumber())
+                .balance(account.getBalance())
+                .accountType(account.getAccountType())
+                .transactions(account.getTransactions())
+                .build();
+    }
 
 
 
@@ -148,7 +170,7 @@ public class BankAccountService {
         // record the transaction first :
 
         Transaction transaction = transactionService
-                .createTransaction(account, amount);
+                .createTransaction(account, amount,TransactionType.DEPOSIT);
 
         // validation:
 
@@ -191,7 +213,7 @@ public class BankAccountService {
         //including failed ones
 
         Transaction transaction = transactionService.createTransaction(
-                account,amount);
+                account,amount,TransactionType.WITHDRAW);
 
 
         //then validation next :
@@ -208,6 +230,7 @@ public class BankAccountService {
         try {
             account.withdraw(amount);
             bankAccountRepository.save(account);
+
 
             transactionService.markCompleted(transaction.getTransactionId());
 
@@ -238,4 +261,73 @@ public class BankAccountService {
                         .build())
                 .toList();
     }
+
+
+
+
+    @Transactional
+    public TransferResponse transfer(String from, String to, BigDecimal amount){
+        BankAccount sourceAccount = bankAccountRepository
+                .findByAccountNumber(from)
+                .orElseThrow(()-> {
+                    log.warn("Source account not found");
+                    return new AccountNotFoundException();
+                });
+
+        BankAccount destinationAccount = bankAccountRepository
+                .findByAccountNumber(to)
+                .orElseThrow(()-> {
+                    log.warn("destination account not found");
+                    return new AccountNotFoundException();
+                });
+
+        Transaction withdrawTransaction = transactionService
+                .createTransaction(sourceAccount,
+                        amount,
+                        TransactionType.TRANSFER);
+
+        Transaction depositTransaction = transactionService
+                .createTransaction(destinationAccount
+                        ,amount,TransactionType.TRANSFER);
+
+
+        sourceAccount.transfer(destinationAccount,amount);
+
+
+        transactionService.markCompleted(depositTransaction.getTransactionId());
+
+        transactionService.markCompleted(withdrawTransaction.getTransactionId());
+
+
+        log.info("Transferring ${} from account number {} to account number {}",
+                amount,
+                sourceAccount.getAccountNumber(),
+                destinationAccount.getAccountNumber());
+
+
+
+
+        TransferResponse response = new TransferResponse();
+        response.setFromAccountNumber(sourceAccount.getAccountNumber());
+        response.setToAccountNumber(destinationAccount.getAccountNumber());
+        response.setAmount(amount);
+        response.setStatus("SUCCESS");
+        response.setMessage("Transfer successful");
+
+        return response;
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
 }

@@ -35,6 +35,9 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 
+    @Enumerated(EnumType.STRING)
+    private TransactionType type;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
@@ -43,12 +46,16 @@ public class Transaction {
 
 
 
-    public Transaction(BankAccount account, BigDecimal amount) {
+
+
+
+    public Transaction(BankAccount account, BigDecimal amount, TransactionType type) {
         this.account = account;
         this.amount=amount;
         this.status = TransactionStatus.PENDING;
         this.referenceId = UUID.randomUUID().toString();
         this.createdAt = LocalDateTime.now();
+        this.type=type;
     }
 
 

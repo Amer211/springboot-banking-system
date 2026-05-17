@@ -54,11 +54,13 @@ public class BankAccount {
 
     // *************** CONSTRUCTORS ***********************
 
-
     public BankAccount(BigDecimal balance, AccountType accountType) {
         this.balance = balance;
         this.accountType = accountType;
     }
+
+
+
 
     public void deposit(BigDecimal amount){
         if (amount.compareTo(BigDecimal.ZERO)<=0){
@@ -83,5 +85,29 @@ public class BankAccount {
 
 
     }
+
+
+    public void transfer(BankAccount destinationAccount, BigDecimal amount){
+
+        if(this.accountNumber.equals(destinationAccount.accountNumber)){
+            throw new IllegalArgumentException("Cannot transfer to the same account");
+        }
+        if(amount.compareTo(BigDecimal.ZERO)<=0){
+            throw new IllegalArgumentException("Transfer amount must be positive");
+        }
+        this.withdraw(amount);
+        destinationAccount.deposit(amount);
+
+
+    }
+
+
+
+
+
+
+
+
+
 
 }

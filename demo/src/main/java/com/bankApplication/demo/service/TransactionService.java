@@ -2,6 +2,7 @@ package com.bankApplication.demo.service;
 
 import com.bankApplication.demo.model.BankAccount;
 import com.bankApplication.demo.model.Transaction;
+import com.bankApplication.demo.model.TransactionType;
 import com.bankApplication.demo.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -27,9 +28,11 @@ public class TransactionService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Transaction createTransaction(BankAccount account,
-                                         BigDecimal amount){
+                                         BigDecimal amount,
+                                         TransactionType type){
 
-        Transaction transaction = new Transaction(account,amount);
+        Transaction transaction = new Transaction(account,
+                amount,type);
 
         return transactionRepository.save(transaction);
 

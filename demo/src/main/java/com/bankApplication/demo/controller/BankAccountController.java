@@ -41,10 +41,11 @@ public class BankAccountController {
 
 
 
-
     @GetMapping("getAll")
-    public ResponseEntity<List<BankAccount>> getAllAccounts(){
-        return ResponseEntity.ok(bankAccountService.getAllAccount());
+    public ResponseEntity<List<AccountResponse>> getAllAccounts(){
+        List<AccountResponse> responses = bankAccountService
+                .getAllAccounts();
+        return ResponseEntity.ok(responses);
     }
 
 
@@ -58,9 +59,6 @@ public class BankAccountController {
 
            return ResponseEntity.ok(response);
     }
-
-
-
 
 
 
@@ -85,6 +83,40 @@ public class BankAccountController {
     public ResponseEntity<BigDecimal> getBalance(@PathVariable int id){
         return ResponseEntity.ok(bankAccountService.getBalanceById(id));
     }
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<AccountResponse> getAccountById
+            (@PathVariable int id){
+        AccountResponse response = bankAccountService.getAccountById(id);
+        return ResponseEntity.ok(response);
+
+
+
+
+    }
+
+
+    @PostMapping("/transfer")
+    public ResponseEntity<TransferResponse> transfer
+            (@Valid @RequestBody TransferRequest request){
+        TransferResponse response = bankAccountService.transfer(
+                request.getFromAccountNumber(),
+                request.getToAccountNumber(),
+                request.getAmount());
+
+        return ResponseEntity.ok(response);
+
+
+
+    }
+
+
+
+
+
+
+
 
 
 
