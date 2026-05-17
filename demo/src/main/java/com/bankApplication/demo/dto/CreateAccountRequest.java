@@ -7,13 +7,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 public class CreateAccountRequest {
 
     @PositiveOrZero(message = "balance can't be negative")
-    private double balance;
+    private BigDecimal balance;
 
     @NotNull(message = "userId is required")
     private Integer userId;

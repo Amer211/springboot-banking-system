@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -16,7 +18,7 @@ public class AccountResponse {
 
     private Integer accountId;
     private String accountNumber;
-    private double balance;
+    private BigDecimal balance;
     private AccountType accountType;
 
 

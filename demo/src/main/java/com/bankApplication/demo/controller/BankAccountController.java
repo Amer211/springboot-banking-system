@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -72,7 +73,7 @@ public class BankAccountController {
                 request.getId(), request.getAmount()
         )
                 .thenApply(newBalance -> new WithdrawResponse("success",
-                        newBalance));
+                        new BigDecimal("newBalance")));
 
         return ResponseEntity
                 .ok(response);
@@ -81,7 +82,7 @@ public class BankAccountController {
 
 
     @GetMapping("/balance/{id}")
-    public ResponseEntity<Double> getBalance(@PathVariable int id){
+    public ResponseEntity<BigDecimal> getBalance(@PathVariable int id){
         return ResponseEntity.ok(bankAccountService.getBalanceById(id));
     }
 

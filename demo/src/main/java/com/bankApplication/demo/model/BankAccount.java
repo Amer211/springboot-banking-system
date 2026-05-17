@@ -5,24 +5,23 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @NoArgsConstructor
-@Setter
 @Getter
-
-
 public class BankAccount {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column
-    private double balance;
+    @Column(nullable = false)
+    private BigDecimal balance;
 
+    @Setter
     @Column
     private String accountNumber;
 
@@ -33,13 +32,15 @@ public class BankAccount {
 
 
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     @JsonBackReference
     private User user;
 
+    @Setter
     @Column
-    private boolean Active = true;
+    private boolean active = true;
 
 
     @Column
@@ -54,39 +55,33 @@ public class BankAccount {
     // *************** CONSTRUCTORS ***********************
 
 
-    public BankAccount(double balance, AccountType accountType) {
+    public BankAccount(BigDecimal balance, AccountType accountType) {
         this.balance = balance;
         this.accountType = accountType;
     }
 
-    public void deposit(double amount){
-        if (amount<=0){
+    public void deposit(BigDecimal amount){
+        if (amount.compareTo(BigDecimal.ZERO)<=0){
             throw new IllegalArgumentException("Deposit must be positive");
         }
 
-        balance+=amount;
+        this.balance=this.getBalance().add(amount);
 
     }
 
 
 
 
-    public void withdraw(double amount){
-        if (amount<=0){
+    public void withdraw(BigDecimal amount){
+        if (amount.compareTo(BigDecimal.ZERO)<=0){
             throw new IllegalArgumentException("Withdrawal must be positive");
         }
-        if (amount>balance){
+        if (amount.compareTo(this.balance)>0){
             throw new InsufficientFundsException();
-        }else {
-            balance-=amount;
-
         }
+        this.balance=this.balance.subtract(amount);
+
+
     }
-
-
-
-
-
-
 
 }

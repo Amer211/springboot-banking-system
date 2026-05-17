@@ -27,7 +27,7 @@ public class Transaction {
     @Column
     private LocalDateTime createdAt;
 
-    private double amount;
+    private BigDecimal amount;
 
 
     private String referenceId;
@@ -43,7 +43,7 @@ public class Transaction {
 
 
 
-    public Transaction(BankAccount account, double amount) {
+    public Transaction(BankAccount account, BigDecimal amount) {
         this.account = account;
         this.amount=amount;
         this.status = TransactionStatus.PENDING;

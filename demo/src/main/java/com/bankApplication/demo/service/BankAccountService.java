@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -44,7 +45,8 @@ public class BankAccountService {
     @Transactional  // import from Spring not Jakarta
     public AccountResponse createBankAccount(CreateAccountRequest request){
 
-        if(request.getBalance()<0){
+        if(request.getBalance().compareTo(BigDecimal.ZERO)<0){
+            log.warn("Balance can't be negative");
             throw new IllegalArgumentException("Balance can't be negative(service layer)");
         }
 
@@ -87,8 +89,8 @@ public class BankAccountService {
 
 
     private String generateAccount() {
-        String bankcode = "3223";
-        StringBuilder accountNumber = new StringBuilder(bankcode);
+        String bankCode = "3223";
+        StringBuilder accountNumber = new StringBuilder(bankCode);
         Random random = new Random();
         for (int i = 0; i < 5; i++) {
             accountNumber.append(random.nextInt(10));
@@ -122,7 +124,7 @@ public class BankAccountService {
 
 
 
-    public Double getBalanceById(int id) {
+    public BigDecimal getBalanceById(int id) {
         BankAccount account = bankAccountRepository.findById(id)
                 .orElseThrow(()-> new AccountNotFoundException(id));
         return account.getBalance();
@@ -135,7 +137,7 @@ public class BankAccountService {
 
 
     @Transactional    // import from Spring not Jakarta
-    public double deposit(int id, double amount) {
+    public BigDecimal deposit(int id, BigDecimal amount) {
         BankAccount account = bankAccountRepository.findById(id)
                 .orElseThrow(()-> {
 
@@ -145,12 +147,12 @@ public class BankAccountService {
 
         // record the transaction first :
 
-        Transaction transaction = transactionService.createTransaction(account,
-                amount);
+        Transaction transaction = transactionService
+                .createTransaction(account, amount);
 
         // validation:
 
-        if(amount<=0){
+        if(amount.compareTo(BigDecimal.ZERO)<=0){
             log.warn("Amount must be positive");
             transactionService.markFailed(transaction.getTransactionId());
             throw new IllegalArgumentException("Amount must be positive");
@@ -177,7 +179,7 @@ public class BankAccountService {
     //******************** withdraw ***************
 
     @Transactional
-    public CompletableFuture<Double> withdraw(int id, Double amount) {
+    public CompletableFuture<BigDecimal> withdraw(int id, BigDecimal amount) {
         BankAccount account = bankAccountRepository.findById(id)
                 .orElseThrow(()-> {
                     log.warn("No account found ");
@@ -194,7 +196,7 @@ public class BankAccountService {
 
         //then validation next :
 
-        if(amount>account.getBalance()){
+        if(amount.compareTo(account.getBalance())>0){
             transactionService.markFailed(transaction.getTransactionId());
             log.warn("Failed to withdraw {}", transaction.getAmount());
             throw new InsufficientFundsException();

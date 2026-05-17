@@ -17,7 +17,7 @@ public class DemoApplication {
                 
                 ======================================\
                 
-                *********APPLICATION STARTED*******++*\
+                *********APPLICATION STARTED**********\
                 
                 ======================================"""
 

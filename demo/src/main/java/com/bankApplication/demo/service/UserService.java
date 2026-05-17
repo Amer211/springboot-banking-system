@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,7 +46,7 @@ public class UserService {
 
 
         AccountResponse account = bankAccountService.createBankAccount(
-                new CreateAccountRequest(0.0,
+                new CreateAccountRequest(new BigDecimal("0.0"),
                         savedUser.getUserId(),
                         request.getAccountType())
         );
@@ -87,6 +88,14 @@ public class UserService {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .email(user.getEmail())
+                .accounts(user.getAccounts().stream()
+                        .map(account -> AccountResponse.builder()
+                                .accountId(account.getId())
+                                .accountNumber(account.getAccountNumber())
+                                .balance(account.getBalance())
+                                .accountType(account.getAccountType())
+                                .build())
+                        .toList())
                 .build();
     }
 }

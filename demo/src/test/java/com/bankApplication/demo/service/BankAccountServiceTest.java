@@ -9,6 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,8 +32,8 @@ class BankAccountServiceTest {
 
     @Test
     void shouldCreateBankAccount() {
-        BankAccount account= new BankAccount(1000, AccountType.COMPLETE_CHECKING);
-        account.setId(1);
+        BankAccount account= new BankAccount(new BigDecimal("1000"), AccountType.COMPLETE_CHECKING);
+
         account.setAccountNumber("1234");
 
 
